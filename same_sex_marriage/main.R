@@ -37,7 +37,10 @@ legal_change <- dcast(legal_change, State ~ value, value.var = "variable")
 
 # Sort by year of legality order change
 custom_order <-  legal_change %>%
-  arrange(Legal, `Constitutional Ban`, `Statutory Ban`, `No Law`)
+  arrange(Legal, `Constitutional Ban`, `Statutory Ban`, desc(`No Law`))
+
+# Apply custom x-axis order
+molten_data$State <- factor(as.character(molten_data$State), levels = unique(custom_order$State))
 
 # Plotting magic
 almost_lgbt <- c("#e40303", "#ff8c00", "#ffed00", "#008026")
@@ -51,7 +54,8 @@ ggplot(molten_data, aes(x = State, y = reorder(variable, -as.numeric(variable)))
        y = "Year",
        fill = "Legality",
        title = "Same-sex Marriage Status by US State and Year",
-       caption = paste0("States sorted by earliest adoption")
+       caption = paste0("States sorted by earliest adoption","\n",
+                        "For /r/dataisbeautiful February 2018 challenge by /u/faaaaaart")
        )
 
 ggsave("same_sex_per_state_per_year.png",
