@@ -3,7 +3,6 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Load libraries
 require(ggplot2)
-require(data.table)
 require(reshape2)
 require(dplyr)
 
@@ -54,8 +53,7 @@ ggplot(molten_data, aes(x = State, y = reorder(variable, -as.numeric(variable)))
        y = "Year",
        fill = "Legality",
        title = "Same-sex Marriage Status by US State and Year",
-       caption = paste0("States sorted by earliest adoption","\n",
-                        "For /r/dataisbeautiful February 2018 challenge by /u/faaaaaart")
+       caption = paste0("States sorted by earliest adoption")
        )
 
 ggsave("same_sex_per_state_per_year.png",
