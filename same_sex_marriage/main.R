@@ -4,6 +4,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # Load libraries
 require(ggplot2)
 require(data.table)
+require(reshape2)
 require(dplyr)
 
 # Load data
@@ -17,17 +18,26 @@ molten_data <- melt(data[,-2], id=1)
 # Convert legality to factor for plotable numeric representations
 molten_data$value <- as.factor(molten_data$value)
 # Properly order legal status from None to Legal
-molten_data$value <- ordered(molten_data$value, levels = c("No Law", 
-                                                           "Statutory Ban", 
-                                                           "Constitutional Ban", 
-                                                           "Legal"))
-# Get first year of Legality by state
-custom_order <- molten_data %>%
-  group_by(State) %>%
-  arrange(variable) %>%
-  filter(value == "Legal")
-# Apply custom x-axis order
-molten_data$State <- factor(as.character(molten_data$State), levels = unique(custom_order$State))
+legality_order <- c("No Law", 
+                    "Statutory Ban", 
+                    "Constitutional Ban", 
+                    "Legal")
+
+molten_data$value <- ordered(molten_data$value, levels = legality_order)
+
+# Get first year of change of legality by state
+legal_change <- molten_data %>%
+  group_by(State, variable) %>%
+  arrange(factor(value, levels = rev(legality_order))) %>%
+  group_by(State, value) %>%
+  slice(1)
+
+# Convert melted long format back to a wide format
+legal_change <- dcast(legal_change, State ~ value, value.var = "variable")
+
+# Sort by year of legality order change
+custom_order <-  legal_change %>%
+  arrange(Legal, `Constitutional Ban`, `Statutory Ban`, `No Law`)
 
 # Plotting magic
 almost_lgbt <- c("#e40303", "#ff8c00", "#ffed00", "#008026")
